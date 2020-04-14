@@ -10,6 +10,7 @@ import java.sql.*;
 
 public class StartPage extends JFrame{
 
+	
 	public StartPage() {
 		JFrame start = new JFrame("login");
 		JPanel jp = new JPanel(); 
@@ -49,7 +50,7 @@ public class StartPage extends JFrame{
 				
 				String u = user.getText().trim();
 				String p = password.getText().trim();
-				int result = checkUserName(u,p);
+				int result = registerUserName(u,p,"");
 				if(result == 1) {
 					JOptionPane.showMessageDialog(start, "Username already in use");
 				}
@@ -78,15 +79,15 @@ public class StartPage extends JFrame{
 	
 
 	public int checkUserName(String name,String password) {
-		try (Connection connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/BookStore", "postgres", "Crystal2013");
+		try (Connection connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/BookStore",  "postgres", "Crystal2013");
 	            Statement statement = connection.createStatement();
 				)
 				{
 				try {
-					String state = "(select password from customer where username = " + name + ")";
+					String state = "(select password from customer where username = '" + name + "')";
 					ResultSet resultSet = statement.executeQuery(state);
-					String pw = resultSet.getString("password");
-					System.out.println(pw);
+					resultSet.first();
+					System.out.println(resultSet.getString(1));
 					return 0;
 					
 				} catch (Exception sqle) {
@@ -98,6 +99,26 @@ public class StartPage extends JFrame{
 	    
 	        } catch (Exception sqle) {
 	            System.out.println("Exception: " + sqle);
+	            return 1;
+	        }
+		}
+	
+	public int registerUserName(String name,String password,String address) {
+		//address = "null";
+		try (Connection connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/BookStore", "postgres", "Crystal2013");
+	            Statement statement = connection.createStatement();
+				)
+				{
+					String state = "insert into customer "
+							+ "values ( '" + name + "' , '" + password + "','" + address + "');";
+					System.out.println(state);
+					statement.executeQuery(state);
+		            System.out.println("Succeed");
+		            return 0;
+		        
+				}
+				catch (Exception sqle) {
+					System.out.println("Exception: " + sqle);
 	            return 1;
 	        }
 		}
