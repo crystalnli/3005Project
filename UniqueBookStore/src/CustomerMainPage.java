@@ -55,12 +55,14 @@ public class CustomerMainPage extends JFrame{
 				JPanel show = new JPanel();
 				String key = (String)list.getSelectedValue();
 				String word = value.getText();
-				ArrayList<String> books = sqlSearch(key,word);
-				if (books.isEmpty()) {
-					books.add("No result");
-				}
-				//JOptionPane.showMessageDialog(null,books,JOptionPane.PLAIN_MESSAGE);
-				
+				String[][] books = sqlSearch(key,word);
+				String[] label = {"ISBN","name"	,"author","genre","price","page_number","book_copies"};
+ 				JTable table = new JTable (books,label);
+				show.add(table);
+				controlPanel.remove(searchPage);
+				controlPanel.add(show);
+				controlPanel.revalidate();
+				controlPanel.repaint();
 			}
 		});
 		
@@ -100,20 +102,33 @@ public class CustomerMainPage extends JFrame{
 		
 	}
 	
-	public ArrayList<String> sqlSearch(String key,String value) {
-		ArrayList<String> books = new ArrayList<String>();
+	public String[][] sqlSearch(String key,String value) {
 		try (Connection connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/BookStore",  "postgres", "Crystal2013");
 	            Statement statement = connection.createStatement();
 				)
 				{
 				try {
+					
 					String state = "(select * from book where " + key +" = '" + value + "')";
 					System.out.println(state);
 					ResultSet rs = statement.executeQuery(state);
+					ResultSetMetaData resultSetMetaData = rs.getMetaData();
+					int columnCount = resultSetMetaData.getColumnCount();
+					
+					//rs.last();
+					//int rowCount = rs.getRow();
+					//rs.beforeFirst();
+					
+					//String[][] books = new String[rowCount][columnCount];
+					String[][] books = new String[1][columnCount];
+					int i = 0;
                     while (rs.next()) {
-                           System.out.println(rs.getString(1));
-                           books.add(rs.getString(1));
-                        
+                         
+                        Object[] values = new Object[columnCount];
+   					    for (int j = 1; j <= columnCount; j++) {
+   					     System.out.println(rs.getString(j));
+   					    	books[i][j-1] = rs.getString(j);
+   					    }
                     }
 					return books;
 					
@@ -126,7 +141,7 @@ public class CustomerMainPage extends JFrame{
 	        } catch (Exception sqle) {
 	            System.out.println("Exception: " + sqle);
 	        }
-		return books;
+		return null;
 	}
 	
 	 public static void main(String[] args){
