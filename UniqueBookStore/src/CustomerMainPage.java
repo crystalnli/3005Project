@@ -52,7 +52,14 @@ public class CustomerMainPage extends JFrame{
 		ok.setAlignmentX(Component.CENTER_ALIGNMENT);
 		ok.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e) {
-				String key = option.toString();
+				JPanel show = new JPanel();
+				String key = (String)list.getSelectedValue();
+				String word = value.getText();
+				ArrayList<String> books = sqlSearch(key,word);
+				if (books.isEmpty()) {
+					books.add("No result");
+				}
+				//JOptionPane.showMessageDialog(null,books,JOptionPane.PLAIN_MESSAGE);
 				
 			}
 		});
@@ -101,6 +108,7 @@ public class CustomerMainPage extends JFrame{
 				{
 				try {
 					String state = "(select * from book where " + key +" = '" + value + "')";
+					System.out.println(state);
 					ResultSet rs = statement.executeQuery(state);
                     while (rs.next()) {
                            System.out.println(rs.getString(1));
